@@ -1,0 +1,75 @@
+# RUNTIME ==========
+seed: 42
+
+
+# DATA ==========
+data:
+  name: movielens
+  entity:
+    num_users: 610
+    num_items: 9724
+
+
+# MODEL ==========
+model:
+  name: comb_bimodal
+  embedding_dim: 32
+  dist: lognormal
+  hyper_approx: 0.1
+  hyper_prior: 1.0
+  beta: 0.5
+  comb: sum
+
+
+# PIPELINE PACKAGE ==========
+# STRATIFIED SPLITTER
+split:
+  ratio:
+    trn: 8
+    val: 1
+    tst: 1
+  min_rating: 1
+  filter_by: user
+# NEGATIVE SAMPLER
+negatives:
+  ratio:
+    optimize: 4
+    measure: 99
+# DATALOADER
+dataloader:
+  batch_size: 256
+  shuffle: True
+# USER, ITEM HIST DATA
+histories:
+  user:
+    selector: tfidf
+    max_hist: 400
+  item:
+    selector: tfidf
+    max_hist: 400
+
+
+# TRAINER PACKAGE ==========
+# TASK
+trainer:
+  strategy: pointwise
+  loss: bce
+  beta: 0.1
+  num_epochs: 100
+# OPT
+optimizer:
+  name: adamw
+  lr: 0.001
+  weight_decay: 0.00001
+# MONITOR
+monitor:
+  metric: ndcg
+  k: 10
+  delta: 0.001
+  patience: 5
+  warmup: 10
+
+
+# EVALUATOR PACKAGE ==========
+evaluator:
+  k: [5, 10, 15, 20, 25, 50]
